@@ -1,4 +1,5 @@
 
+import { memo } from 'react';
 import MainRouter from './routes'
 import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,4 +24,4 @@ const App=()=> (
   </div>
 )
 
-export default App
+export default memo(App)
