@@ -12,8 +12,8 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLogin, switchToSignup, loading }) => {
   const [formValue, setFormValue] = useState<UserLoginFormValueType>({
-    email: "shivamchaubey@gmail.com",
-    password: "123456"
+    email: "",
+    password: ""
   });
   const [error, setError] = useState<UserLoginFormValueErrorType>({
     emailError:"",

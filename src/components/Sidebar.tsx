@@ -62,7 +62,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="w-64 shrink-0 border-r border-gray-200 flex flex-col">
       <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2">AskMyData</h1>
-      <div className="p-4 flex-1 flex flex-col space-y-2 bg-white">
+      <div className="p-4 flex-1 flex flex-col space-y-2 bg-white h-[calc(100%-48px)]">
         <input type='file' id='file' name='file' ref={inputRef} className='hidden' onChange={handleInputChange} />
         {
           !fileUploading ? (
@@ -78,7 +78,7 @@ const Sidebar: React.FC = () => {
               </Button>
             )
         }
-        <ul>
+        <ul className='h-full overflow-y-auto'>
           {
             files?.map(ele => (
               <li key={ele.id} className='cursor-pointer py-1 px-0.5 rounded-sm hover:bg-gray-100 overflow-hidden text-ellipsis line-clamp-1'>
