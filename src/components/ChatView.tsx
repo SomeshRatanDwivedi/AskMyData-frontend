@@ -4,6 +4,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import type { Message } from '@/types';
+import { askQuestion } from '@/api/ai';
+import { handleCatchBlockError } from '@/utility';
+import { toast } from 'react-toastify';
 
 const ChatView: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -13,33 +16,26 @@ const ChatView: React.FC = () => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const chatRef = useRef(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-  //   try {
-  //     const apiKey = process.env.API_KEY;
-  //     if (!apiKey) {
-  //       console.error("API_KEY environment variable not set.");
-  //       setMessages(prev => [...prev, { role: 'model', content: 'Configuration error: API key is missing.' }]);
-  //       return;
-  //     }
-  //     const ai = new GoogleGenAI({ apiKey });
-  //     chatRef.current = ai.chats.create({ model: 'gemini-2.5-flash' });
-  //   } catch (e) {
-  //     console.error(e);
-  //     setMessages(prev => [...prev, { role: 'model', content: 'An error occurred during initialization.' }]);
-  //   }
-  // }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleMessageError = () => {
+    const errorMessage = 'Sorry, an error occurred while getting a response. Please check your API key and network connection.';
+    setMessages((prev) => {
+      const newMessages = [...prev];
+      newMessages[newMessages.length - 1] = { role: 'model', content: errorMessage, isThinking: false };
+      return newMessages;
+    });
+  };
+
   useEffect(scrollToBottom, [messages]);
 
   const handleSendMessage = async (prompt: string) => {
-    if (!prompt.trim() || isLoading || !chatRef.current) return;
+    if (!prompt.trim() || isLoading ) return;
 
     setIsLoading(true);
 
@@ -47,37 +43,21 @@ const ChatView: React.FC = () => {
     setMessages((prev) => [...prev, userMessage, { role: 'model', content: '', isThinking: true }]);
 
     try {
-      const stream = await chatRef.current.sendMessageStream({ message: prompt });
-      let fullResponse = '';
-      let firstChunk = true;
-
-      for await (const chunk of stream) {
-        const chunkText = chunk.text;
-        fullResponse += chunkText;
-
-        if (firstChunk) {
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            newMessages[newMessages.length - 1] = { role: 'model', content: fullResponse, isThinking: false };
-            return newMessages;
-          });
-          firstChunk = false;
-        } else {
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            newMessages[newMessages.length - 1].content = fullResponse;
-            return newMessages;
-          });
-        }
+      const res = await askQuestion(prompt);
+      if (res?.success) {
+        const modelMessage: Message = { role: 'model', content: res.data, isThinking: false };
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = modelMessage;
+          return newMessages;
+        });
+      } else {
+        toast.error(res?.message);
+        handleMessageError();
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = 'Sorry, an error occurred while getting a response. Please check your API key and network connection.';
-      setMessages((prev) => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = { role: 'model', content: errorMessage, isThinking: false };
-        return newMessages;
-      });
+      handleCatchBlockError(error,"Error sending message:")
+      handleMessageError();
     } finally {
       setIsLoading(false);
     }

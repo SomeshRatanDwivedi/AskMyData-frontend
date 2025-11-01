@@ -43,7 +43,6 @@ const Sidebar: React.FC = () => {
   const getFiles = async () => {
     try {
       const res = await getUserFiles();
-      console.log(res, "res");
       if (res?.success) {
         setFiles(res.data);
       } else {

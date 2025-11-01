@@ -25,7 +25,7 @@ const ThinkingBlock: React.FC = () => (
       </div>
       <ChevronUpIcon className="w-5 h-5" />
     </div>
-    <p>I'm being asked to respond with a simple "hi" back to the user. I'll do that.</p>
+    <p>Thinking...</p>
     <p>Ok, I'm ready to generate my response:</p>
   </div>
 );
@@ -80,11 +80,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             )}
 
             {!message.isThinking && message.content && <MessageActions />}
-            {!message.isThinking && message.content && (
-              <button className="text-sm text-gray-600 hover:text-gray-900 font-semibold mt-2">
-                Show Citations &gt;
-              </button>
-            )}
           </div>
         )}
       </div>
