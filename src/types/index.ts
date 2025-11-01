@@ -5,6 +5,7 @@ export interface Message {
   role: Role;
   content: string;
   isThinking?: boolean;
+  id?:string
 }
 
 export type UserLoginFormValueType = {
@@ -25,4 +26,9 @@ export type UserRegisterFormValueType = UserLoginFormValueType &{
 export type UserRegisterFormValueErrorType = UserLoginFormValueErrorType &{
   firstNameError: string,
   lastNameError: string;
+}
+
+export type ChatType = {
+  question: string;
+  answer: string
 }

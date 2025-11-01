@@ -1,12 +1,13 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-// import { GoogleGenAI, Chat } from '@google/genai';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import type { Message } from '@/types';
+import type { ChatType, Message } from '@/types';
 import { askQuestion } from '@/api/ai';
 import { handleCatchBlockError } from '@/utility';
 import { toast } from 'react-toastify';
+import { getChat, saveChat } from '@/api/chat/intex';
+import { useCallback } from 'react';
 
 const ChatView: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -32,8 +33,6 @@ const ChatView: React.FC = () => {
     });
   };
 
-  useEffect(scrollToBottom, [messages]);
-
   const handleSendMessage = async (prompt: string) => {
     if (!prompt.trim() || isLoading ) return;
 
@@ -45,12 +44,11 @@ const ChatView: React.FC = () => {
     try {
       const res = await askQuestion(prompt);
       if (res?.success) {
-        const modelMessage: Message = { role: 'model', content: res.data, isThinking: false };
-        setMessages((prev) => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1] = modelMessage;
-          return newMessages;
-        });
+        const newChat = {
+          question: prompt,
+          answer: res.data,
+        }
+        await saveChatHistory(newChat);
       } else {
         toast.error(res?.message);
         handleMessageError();
@@ -63,13 +61,55 @@ const ChatView: React.FC = () => {
     }
   };
 
+  const getChatHistory = useCallback(async() => {
+    try {
+      const res = await getChat();
+      if (res?.success) {
+        if (res.data.length > 0) {
+          setMessages(res?.data);
+        }
+      } else {
+        toast.error(res?.message);
+      }
+    } catch (err) {
+      console.log("Erro in getChatHistory: ", err);
+      handleCatchBlockError(err, "Error getting chat history:")
+    }
+  },[])
+
+  const saveChatHistory = async (chat: ChatType) => {
+    try {
+      const res = await saveChat(chat);
+      if (res?.success) {
+        const modelMessage: Message = { ...res.data, isThinking: false };
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = modelMessage;
+          return newMessages;
+        });
+      } else {
+        toast.error(res?.message)
+      } 
+    } catch (err) {
+      console.log("Erro in saveChatHistory: ", err);
+      handleCatchBlockError(err, "Error saving chat history:")
+    }
+  }
+
+
+  useEffect(() => {
+      getChatHistory();
+  }, [getChatHistory])
+
+  useEffect(scrollToBottom, [messages]);
+  
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
         <div className="max-w-3xl">
           <div className="space-y-8">
-            {messages.map((msg, index) => (
-              <ChatMessage key={index} message={msg} />
+            {messages.map((msg, ind) => (
+              <ChatMessage key={ind} message={msg}  refreshChatHistory={getChatHistory}/>
             ))}
           </div>
           <div ref={messagesEndRef} />
@@ -84,4 +124,4 @@ const ChatView: React.FC = () => {
   );
 };
 
-export default ChatView;
+export default memo(ChatView);

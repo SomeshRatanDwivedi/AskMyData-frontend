@@ -1,19 +1,22 @@
 
-import React from 'react';
+import React,{memo} from 'react';
 import {
   BrainIcon,
   ChevronUpIcon,
   ClipboardIcon,
   EditIcon,
-  MoreHorizontalIcon,
   RefreshCwIcon,
-  ThumbsDownIcon,
   BotIcon
 } from './Icons';
 import type { Message } from '@/types';
+import { handleCatchBlockError } from '@/utility';
+import { deleteChat } from '@/api/chat/intex';
+import { toast } from 'react-toastify';
+
 
 interface ChatMessageProps {
   message: Message;
+  refreshChatHistory:()=>void
 }
 
 const ThinkingBlock: React.FC = () => (
@@ -30,17 +33,31 @@ const ThinkingBlock: React.FC = () => (
   </div>
 );
 
-const MessageActions: React.FC = () => (
-  <div className="flex items-center space-x-3 text-gray-500 mt-3">
-    <button className="hover:text-gray-800"><ClipboardIcon className="w-4 h-4" /></button>
-    <button className="hover:text-gray-800"><EditIcon className="w-4 h-4" /></button>
-    <button className="hover:text-gray-800"><RefreshCwIcon className="w-4 h-4" /></button>
-    <button className="hover:text-gray-800"><ThumbsDownIcon className="w-4 h-4" /></button>
-    <button className="hover:text-gray-800"><MoreHorizontalIcon className="w-4 h-4" /></button>
-  </div>
-);
+const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatHistory }) => {
+  const handleDeleteChat = async () => {
+    try {
+      const res = await deleteChat(message?.id ?? "");
+      if (res?.success) {
+        toast.success("Chat deleted successfully.");
+        refreshChatHistory()
+      } else {
+        toast.error(res?.message);
+      }
+    } catch (err) {
+      console.log("Error in handleDeleteChat: ", err);
+      handleCatchBlockError(err, "Error deleting chat:");
+    }
+  }
+  return (
+    <div className="flex items-center space-x-3 text-gray-500 mt-3">
+      <button title='Delete' className="hover:text-gray-800" onClick={handleDeleteChat}><ClipboardIcon className="w-4 h-4" /></button>
+      <button title='Edit' className="hover:text-gray-800"><EditIcon className="w-4 h-4" /></button>
+      <button title='Re-generate' className="hover:text-gray-800"><RefreshCwIcon className="w-4 h-4" /></button>
+    </div>
+  )
+});
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory }) => {
   const isUser = message.role === 'user';
 
   const Avatar: React.FC = () => {
@@ -79,7 +96,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse"></div>
             )}
 
-            {!message.isThinking && message.content && <MessageActions />}
+              {!message.isThinking && message.content && <MessageActions message={message} refreshChatHistory={refreshChatHistory} />}
           </div>
         )}
       </div>
@@ -87,4 +104,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   );
 };
 
-export default ChatMessage;
+export default memo(ChatMessage);
