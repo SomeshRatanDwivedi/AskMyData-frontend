@@ -18,12 +18,15 @@ import { useNavigate } from 'react-router-dom';
 const Header: React.FC = () => {
   const { firstName = "", lastName = "", stFnResetUserStore } = useUserStore(useShallow((state) => ({ firstName: state.stUser.firstName, lastName: state.stUser.lastName, stFnResetUserStore: state.stFnResetUserStore })));
   const navigate = useNavigate();
-  const logo = firstName[0].toUpperCase() + lastName[0].toUpperCase();
+  const logo = firstName[0]?.toUpperCase() + lastName[0]?.toUpperCase();
 
   const handleLogout = () => {
     localStorage.clear();
     stFnResetUserStore();
     return navigate("/auth/login");
+  }
+  const handleProfileClick = () => {
+    return navigate("/app/profile");
   }
   return (
     <header className="shrink-0 h-16 flex items-center justify-end px-8 border-b border-gray-200">
@@ -34,7 +37,7 @@ const Header: React.FC = () => {
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleProfileClick}>
               Profile
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>

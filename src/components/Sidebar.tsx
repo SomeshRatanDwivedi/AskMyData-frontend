@@ -6,11 +6,18 @@ import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'react-toastify';
 import { handleCatchBlockError } from '@/utility';
 import { getUserFiles, uploadFile } from '@/api/file';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<{id:string, originalName:string}[]>([]);
   const [fileUploading, setFileUploading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    return navigate("/app");
+  }
+
   const handleInputClick = () => {
     if (inputRef && inputRef.current) {
       inputRef.current.click();
@@ -60,7 +67,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-64 shrink-0 border-r border-gray-200 flex flex-col">
-      <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2">AskMyData</h1>
+      <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2 cursor-pointer" onClick={handleLogoClick}>AskMyData</h1>
       <div className="p-4 flex-1 flex flex-col space-y-2 bg-white h-[calc(100%-48px)]">
         <input type='file' id='file' name='file' ref={inputRef} className='hidden' onChange={handleInputChange} />
         {

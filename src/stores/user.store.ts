@@ -4,7 +4,10 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 type UserStore = {
   stUser: Partial<UserRegisterFormValueType>&{
-    accessToken:string
+    accessToken: string,
+    userId: number | null,
+    createdAt: string,
+    updatedAt: string
   };
   stFnUpdateUser: (stUser: Partial<UserRegisterFormValueType>) => void;
   stFnResetUserStore:()=>void
@@ -13,18 +16,24 @@ type UserStore = {
 const useUserStore = create<UserStore>()(
   persist<UserStore>((set) => ({
     stUser: {
+      userId:null,
       email: "",
       firstName: "",
       lastName: "",
-      accessToken:""
+      accessToken: "",
+      createdAt: "",
+      updatedAt:""
     },
     stFnUpdateUser: (user: Partial<UserRegisterFormValueType>) => set((state: UserStore) => ({ ...state, stUser: { ...state.stUser, ...user } })),
     stFnResetUserStore: () => set(() => ({
       stUser: {
+        userId:null,
         email: "",
         firstName: "",
         lastName: "",
-        accessToken: ""
+        accessToken: "",
+        createdAt: "",
+        updatedAt: ""
       }
     }))
   }),

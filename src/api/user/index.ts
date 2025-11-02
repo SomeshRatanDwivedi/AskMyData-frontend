@@ -21,3 +21,8 @@ export const signup = async (userInfo: UserRegisterFormValueType) => {
   const response = await askMyDataApi.post("user/register", userInfo);
   return response.data;
 };
+
+export const updateUserProfile = async (userInfo: Partial<UserRegisterFormValueType>) => {
+  const response = await askMyDataApi.put("user/edit-profile", userInfo);
+  return response.data;
+}
