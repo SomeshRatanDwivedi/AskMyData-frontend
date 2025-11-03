@@ -26,3 +26,13 @@ export const updateUserProfile = async (userInfo: Partial<UserRegisterFormValueT
   const response = await askMyDataApi.put("user/edit-profile", userInfo);
   return response.data;
 }
+
+export const getAllUsers = async () => {
+  const response = await askMyDataApi.get("user/all-users");
+  return response.data;
+}
+
+export const getUserDetailsByUserId = async (id: number) => {
+  const response = await askMyDataApi.get(`user/${id}`);
+  return response.data;
+}

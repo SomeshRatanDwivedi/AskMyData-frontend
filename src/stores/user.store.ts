@@ -1,14 +1,9 @@
-import type {UserRegisterFormValueType } from '@/types';
+import type {UserRegisterFormValueType, UserType } from '@/types';
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 type UserStore = {
-  stUser: Partial<UserRegisterFormValueType>&{
-    accessToken: string,
-    userId: number | null,
-    createdAt: string,
-    updatedAt: string
-  };
+  stUser: Partial<UserType>;
   stFnUpdateUser: (stUser: Partial<UserRegisterFormValueType>) => void;
   stFnResetUserStore:()=>void
 }
@@ -20,6 +15,7 @@ const useUserStore = create<UserStore>()(
       email: "",
       firstName: "",
       lastName: "",
+      isAdmin:false,
       accessToken: "",
       createdAt: "",
       updatedAt:""
@@ -31,6 +27,7 @@ const useUserStore = create<UserStore>()(
         email: "",
         firstName: "",
         lastName: "",
+        isAdmin:false,
         accessToken: "",
         createdAt: "",
         updatedAt: ""

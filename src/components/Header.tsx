@@ -10,13 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
-  const { firstName = "", lastName = "", stFnResetUserStore } = useUserStore(useShallow((state) => ({ firstName: state.stUser.firstName, lastName: state.stUser.lastName, stFnResetUserStore: state.stFnResetUserStore })));
+  const { stUser,stFnResetUserStore } = useUserStore(useShallow((state) => ({ stUser: state.stUser, stFnResetUserStore: state.stFnResetUserStore })));
+  const { isAdmin, firstName = "", lastName = "", userId } = stUser;
   const navigate = useNavigate();
   const logo = firstName[0]?.toUpperCase() + lastName[0]?.toUpperCase();
 
@@ -26,7 +26,11 @@ const Header: React.FC = () => {
     return navigate("/auth/login");
   }
   const handleProfileClick = () => {
-    return navigate("/app/profile");
+    return navigate(`/app/profile/${userId}`);
+  }
+
+  const handleSettingClick = () => {
+    return navigate("/app/settings");
   }
   return (
     <header className="shrink-0 h-16 flex items-center justify-end px-8 border-b border-gray-200">
@@ -39,13 +43,19 @@ const Header: React.FC = () => {
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={handleProfileClick}>
               Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
+            {
+              isAdmin && (
+                <DropdownMenuItem onClick={handleSettingClick}>
+                  Settings
+                </DropdownMenuItem>
+              )
+            }
+
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
             Log out
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

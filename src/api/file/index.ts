@@ -5,7 +5,11 @@ export const uploadFile = async (formValue: FormData) => {
   return res.data;
 }
 
-export const getUserFiles = async () => {
-  const res = await askMyDataApi.get("/file/get-user-files");
+export const getUserFiles = async (id?: number | null) => {
+  let url = '/file/get-user-files';
+  if (id) {
+    url+=`/${id}`;
+  }
+  const res = await askMyDataApi.get(url);
   return res.data;
 }

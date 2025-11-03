@@ -32,3 +32,19 @@ export type ChatType = {
   question: string;
   answer: string
 }
+
+export type FileType = {
+  id: string;
+  originalName:string
+}
+
+export type UserType = UserRegisterFormValueType & {
+  accessToken: string,
+  userId: number | null,
+  createdAt: string,
+  updatedAt: string,
+  isAdmin: boolean,
+  files?: FileType[],
+  filesCount?: number,
+  isDisabled?:boolean
+}
