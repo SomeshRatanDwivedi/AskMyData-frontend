@@ -9,30 +9,45 @@ import { getUserDetailsByUserId, updateUserProfile } from "@/api/user";
 import useUserStore from "@/stores/user.store";
 import { useShallow } from "zustand/react/shallow";
 import type { UserType } from "@/types";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import { Eye } from "lucide-react";
 
 function ProfilePage() {
   const { stUser, stFnUpdateUser } = useUserStore(useShallow((state) => ({ stUser: state.stUser, stFnUpdateUser: state.stFnUpdateUser })));
-  const [isEditing, setIsEditing] = useState(false);
+  const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isEditing, setIsEditing] = useState(searchParams.get("editMode") === "true");
 
   const [userDetails, setUserDetails] = useState<Partial<UserType>>({
     userId: 0,
+    email: "",
+    groqApiKey: "",
     firstName: "",
     lastName: "",
     createdAt: "",
-    updatedAt:""
+    updatedAt: ""
   })
-  const params = useParams();
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setUserDetails((prev)=>({...prev,[e.target.name]: e.target.value}));
+    setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSave = async() => {
+  const clearEditMode = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("editMode");
+    setSearchParams(next);
+  };
+
+  const handleSave = async () => {
     setIsEditing(false);
     try {
-      console.log(userDetails, "userdetails")
-      const res = await updateUserProfile(userDetails);
+      const payload = {
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        groqApiKey: userDetails.groqApiKey
+      }
+      const res = await updateUserProfile(payload);
       if (res?.success) {
         toast.success("Profile updated successfully!");
         if (Number(params.id) === stUser.userId) {
@@ -48,7 +63,7 @@ function ProfilePage() {
     }
   };
 
-  const getUserDetailsId = async (id:number) => {
+  const getUserDetailsId = async (id: number) => {
     try {
       const res = await getUserDetailsByUserId(id);
       if (res?.success) {
@@ -66,20 +81,27 @@ function ProfilePage() {
     if (params.id) {
       getUserDetailsId(Number(params.id))
     }
-  },[params.id])
-
+  }, [params.id])
 
   return (
     <div className="h-full bg-[#f8fafc] flex justify-center items-center">
       <Card className="w-full max-w-lg shadow-lg border border-gray-200 pt-0">
         <CardHeader className="bg-linear-to-r from-indigo-500 to-purple-500 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-semibold">{Number(params.id) === stUser.userId?"My ":"User "} Profile</CardTitle>
+          <CardTitle className="text-xl font-semibold p-4 text-center">{Number(params.id) === stUser.userId ? "My " : `${userDetails.firstName} ${userDetails.lastName}'s`} Profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5 mt-5">
           <div>
             <Label className="text-gray-700">User ID</Label>
             <Input
-              value={userDetails.userId??""}
+              value={userDetails.userId ?? ""}
+              disabled
+              className="mt-1 bg-gray-100"
+            />
+          </div>
+          <div>
+            <Label className="text-gray-700">User Email</Label>
+            <Input
+              value={userDetails.email ?? ""}
               disabled
               className="mt-1 bg-gray-100"
             />
@@ -108,17 +130,28 @@ function ProfilePage() {
           </div>
           <div>
             <Label className="text-gray-700">Groq Api Key</Label>
-            <Input
-              type="password"
-              value={new Date(userDetails.createdAt??"").toLocaleString()}
-              disabled
-              className="mt-1 bg-gray-100"
-            />
+            <div className="flex items-center">
+              <Input
+                type={showApiKey ? "text" : "password"}
+                name="groqApiKey"
+                value={userDetails.groqApiKey}
+                className="mt-1 bg-gray-100 mr-1"
+                onChange={handleChange}
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="View file"
+                onClick={() => setShowApiKey(!showApiKey)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div>
             <Label className="text-gray-700">Created At</Label>
             <Input
-              value={new Date(userDetails.createdAt??"").toLocaleString()}
+              value={new Date(userDetails.createdAt ?? "").toLocaleString()}
               disabled
               className="mt-1 bg-gray-100"
             />
@@ -126,7 +159,7 @@ function ProfilePage() {
           <div>
             <Label className="text-gray-700">Updated At</Label>
             <Input
-              value={new Date(userDetails.updatedAt??"").toLocaleString()}
+              value={new Date(userDetails.updatedAt ?? "").toLocaleString()}
               disabled
               className="mt-1 bg-gray-100"
             />
@@ -141,7 +174,10 @@ function ProfilePage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    clearEditMode();
+                    setIsEditing(false);
+                  }}
                   className="border-gray-400 text-gray-600"
                 >
                   Cancel

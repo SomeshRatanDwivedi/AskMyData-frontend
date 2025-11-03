@@ -13,3 +13,15 @@ export const getUserFiles = async (id?: number | null) => {
   const res = await askMyDataApi.get(url);
   return res.data;
 }
+
+export const deleteUserFiles = async (userId: number, fileId: string) => {
+  let url = '/file/delete-file';
+  if (userId) {
+    url += `/${userId}`;
+  }
+  if (fileId) {
+    url += `/${fileId}`;
+  }
+  const res = await askMyDataApi.delete(url);
+  return res.data;
+}

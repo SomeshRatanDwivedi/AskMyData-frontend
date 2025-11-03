@@ -36,3 +36,13 @@ export const getUserDetailsByUserId = async (id: number) => {
   const response = await askMyDataApi.get(`user/${id}`);
   return response.data;
 }
+
+export const deleteUser = async (userId: number) => {
+  const response = await askMyDataApi.delete(`user/${userId}`);
+  return response.data;
+}
+
+export const enableDisableUser = async (userId: number) => {
+  const response = await askMyDataApi.put(`user/${userId}/enable-disable`);
+  return response.data;
+}

@@ -1,25 +1,31 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash, Edit, Ban } from "lucide-react";
+import { Loader2, Trash, Edit, Ban, UserCheckIcon, Crown } from "lucide-react";
 import type { UserType } from "@/types";
-import { getAllUsers } from "@/api/user";
+import { getAllUsers, enableDisableUser as enableDisableSelectedUser, deleteUser as deleteSelectedUser } from "@/api/user";
 import { toast } from "react-toastify";
 import { handleCatchBlockError } from "@/utility";
 import { useNavigate } from "react-router-dom";
 import UserFilesModal from "@/components/UserFilesModal";
-import { getUserFiles } from "@/api/file";
+import { deleteUserFiles, getUserFiles, } from "@/api/file";
+import useUserStore from "@/stores/user.store";
+import { useShallow } from "zustand/react/shallow";
 
 const AdminSettingsPage = () => {
+  const stUser = useUserStore(useShallow((state) => state.stUser));
   const [users, setUsers] = useState<UserType[]>([]);
+  const [clickedUser, setClickedUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [files, setFiles] = useState([]);
-
   const navigate = useNavigate();
-
+  const handleUserClick = (userId:number,editClicked=false) => {
+    const profileUrl = `/app/profile/${userId}?editMode=${editClicked}`;
+    navigate(profileUrl);
+ }
   // ✅ Fetch all users from backend
   const getUsers = async () => {
     try {
@@ -37,37 +43,80 @@ const AdminSettingsPage = () => {
       setLoading(false);
     }
   };
-  const handleOpenFiles = async (userId: number | null) => {
+  const handleOpenFiles = useCallback(async (user: UserType) => {
     try {
-      const res = await getUserFiles(userId);
+      if (!user.userId) return;
+      const res = await getUserFiles(user.userId ?? clickedUser?.userId);
       if (res?.success) {
         setFiles(res.data);
-        setOpen(true);
+        if (!clickedUser) {
+          setClickedUser(user);
+        }
+        if (!open) {
+          setOpen(true);
+        }
       } else {
         toast.error(res.message);
       }
     } catch (error) {
       console.error("Failed to load files:", error);
       handleCatchBlockError(error);
-    } 
-  };
+    }
+  }, [clickedUser, open]);
 
+  const onFileDelete = useCallback(async (fileId: string) => {
+    try {
+      if (!clickedUser?.userId) return;
+      const res = await deleteUserFiles(clickedUser?.userId, fileId);
+      await handleOpenFiles(clickedUser);
+      if (res?.success) {
+        toast.success("File deleted successfully.");
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.log("Failed to delete files:", error);
+      handleCatchBlockError(error, "Failed to delete files");
+    }
+
+  }, [clickedUser, handleOpenFiles]);
   // ✅ Disable User
-  const disableUser = async (id: number) => {
-    await fetch(`/api/admin/users/${id}/disable`, { method: "POST" });
-    getUsers();
+  const enableDisableUser = async (userId: number) => {
+    try {
+      const res = await enableDisableSelectedUser(userId);
+      if (res?.success) {
+        toast.success("User disabled successfully.");
+        getUsers();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.error("Failed to disable user:", error);
+      handleCatchBlockError(error, "Failed to disable user");
+    }
   };
 
   // ✅ Delete User
-  const deleteUser = async (id: number) => {
-    await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
-    getUsers();
+  const deleteUser = async (userId: number) => {
+    try {
+      const res = await deleteSelectedUser(userId ?? 0);
+      if (res?.success) {
+        toast.success("User deleted successfully.");
+        getUsers();
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.error("Failed to disable user:", error);
+      handleCatchBlockError(error, "Failed to disable user");
+    }
   };
 
-
   useEffect(() => {
-    getUsers();
-  }, []);
+    if (!open) {
+      getUsers();
+    }
+  }, [open]);
 
 
 
@@ -99,47 +148,69 @@ const AdminSettingsPage = () => {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.userId}>
-                    <TableCell className="cursor-pointer" onClick={() => navigate(`/app/profile/${user.userId}`)}>{user.firstName} {user.lastName}</TableCell>
+                    <TableCell className="cursor-pointer" onClick={() => handleUserClick(user.userId??0)}>{user.firstName} {user.lastName}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell className="cursor-pointer" onClick={()=>handleOpenFiles(user.userId)}>{user?.filesCount || 0}</TableCell>
+                    <TableCell className="cursor-pointer" onClick={() => handleOpenFiles(user)}>{user?.filesCount || 0}</TableCell>
                     <TableCell>
-                      {user?.isDisabled ? (
-                        <Badge variant="destructive">Disabled</Badge>
-                      ) : (
+                      {user?.isActive ? (
                         <Badge className="bg-green-500">Active</Badge>
+                      ) : (
+                        <Badge variant="destructive">Disabled</Badge>
+
                       )}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleUserClick(user.userId ?? 0, true)}>
                         <Edit className="h-4 w-4 mr-1" /> Edit
                       </Button>
 
-                      {!user?.isDisabled && (
+                      
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => disableUser(user.userId??0)}
-                        >
-                          <Ban className="h-4 w-4 mr-1 text-red-500" /> Disable
+                        onClick={() => enableDisableUser(user.userId ?? 0)}
+                          disabled={user.userId === stUser.userId}
+                      >
+                        {
+                          user?.isActive ? <Ban className="h-4 w-4 mr-1 text-red-500" />
+                            : <UserCheckIcon className="h-4 w-4 mr-1 text-green-500" />
+                        }
+                        {
+                          user?.isActive ? "Disable":"Enable"
+                        }
                         </Button>
-                      )}
 
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => deleteUser(user.userId??0)}
+                        onClick={() => deleteUser(user.userId ?? 0)}
+                        disabled={user.userId === stUser.userId}
                       >
                         <Trash className="h-4 w-4 mr-1" /> Delete
                       </Button>
+
+                      {
+                        stUser.isAdmin && user.userId!==stUser.userId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-indigo-500 text-white"
+                            onClick={() => deleteUser(user.userId ?? 0)}
+                            disabled={user.userId === stUser.userId}
+                          >
+                            <Crown className="h-4 w-4 mr-1" /> Make Admin
+                          </Button>
+                        )
+                      }
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-              </Table>
+            </Table>
           )}
         </CardContent>
       </Card>
-        <UserFilesModal open={open} onClose={() => setOpen(false)} files={files} />
+      <UserFilesModal clickedUser={clickedUser} open={open} onClose={() => setOpen(false)} files={files} onDelete={onFileDelete} />
     </div>
   );
 };

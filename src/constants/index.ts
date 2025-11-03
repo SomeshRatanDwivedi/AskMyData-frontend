@@ -59,3 +59,10 @@ export const USER_INPUTS_INFO_LOGIN = [
 ];
 
 export const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
+
+export const BADGE_COLOR_STATUS_MAPPING: Record<string, string> = {
+  "UNKNOWN": "bg-gray-100 text-gray-800",
+  "PENDING": "bg-yellow-100 text-yellow-800",
+  "EMBEDDED": "bg-green-100 text-green-800",
+  "FAILED": "bg-red-100 text-red-800",
+};

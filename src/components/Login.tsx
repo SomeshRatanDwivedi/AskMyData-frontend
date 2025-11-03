@@ -46,7 +46,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, switchToSignup, loading }) => {
     if (inputName === "password" && showPassword) return "text";
     return inputType;
   }
-  console.count("login component");
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-100">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Login</h1>

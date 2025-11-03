@@ -32,11 +32,18 @@ export type ChatType = {
   question: string;
   answer: string
 }
-
+// Types
+export type FileStatus = "PENDING" | "EMBEDDED" | "FAILED" | "UNKNOWN";
 export type FileType = {
   id: string;
-  originalName:string
+  originalName: string;
+  size: number; // bytes
+  createdAt: string | number | Date;
+  status: FileStatus;
+  filePath: string;
 }
+
+
 
 export type UserType = UserRegisterFormValueType & {
   accessToken: string,
@@ -46,5 +53,6 @@ export type UserType = UserRegisterFormValueType & {
   isAdmin: boolean,
   files?: FileType[],
   filesCount?: number,
-  isDisabled?:boolean
+  isActive?: boolean,
+  groqApiKey:string
 }

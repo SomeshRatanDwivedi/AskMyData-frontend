@@ -5,12 +5,14 @@ import { Button } from './ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'react-toastify';
 import { handleCatchBlockError } from '@/utility';
-import { getUserFiles, uploadFile } from '@/api/file';
+import { getUserFiles, uploadFile, deleteUserFiles } from '@/api/file';
 import { useNavigate } from 'react-router-dom';
+import { Eye, Trash2 } from 'lucide-react';
+import { ASK_MY_DATA_API_BASE_URL } from '@/constants/api.constant';
 
 const Sidebar: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<{id:string, originalName:string}[]>([]);
+  const [files, setFiles] = useState<{id:string, originalName:string, filePath?: string}[]>([]);
   const [fileUploading, setFileUploading] = useState(false);
   const navigate = useNavigate();
 
@@ -60,6 +62,27 @@ const Sidebar: React.FC = () => {
     }
   }
 
+  const openFile = (path?: string) => {
+    if (!path) return toast.error('File path not available');
+    const joined = `${ASK_MY_DATA_API_BASE_URL}`.replace(/\/$/, "") + "/" + `${path}`.replace(/^\//, "");
+    window.open(joined, '_blank');
+  };
+
+  const handleDelete = async (fileId: string) => {
+    try {
+      // Assuming backend infers user from auth; if requires userId, adapt accordingly
+      const res = await deleteUserFiles(undefined as unknown as number, fileId);
+      if (res?.success) {
+        setFiles((prev) => prev.filter((f) => f.id !== fileId));
+        toast.success('File deleted successfully.');
+      } else {
+        toast.error(res?.message || 'Failed to delete file');
+      }
+    } catch (err) {
+      handleCatchBlockError(err, 'Failed to delete file');
+    }
+  };
+  
   useEffect(() => {
     getFiles();
   }, [])
@@ -87,8 +110,26 @@ const Sidebar: React.FC = () => {
         <ul className='h-full overflow-y-auto'>
           {
             files?.map(ele => (
-              <li key={ele.id} className='cursor-pointer py-1 px-0.5 rounded-sm hover:bg-gray-100 overflow-hidden text-ellipsis line-clamp-1'>
-                {ele.originalName}
+              <li key={ele.id} className='group flex items-center justify-between gap-2 py-1 px-1 rounded-sm hover:bg-gray-100'>
+                <span className='overflow-hidden text-ellipsis line-clamp-1'>{ele.originalName}</span>
+                <span className='flex items-center gap-1 opacity-100'>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="View file"
+                    onClick={() => openFile(ele.filePath)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Delete file"
+                    onClick={() => handleDelete(ele.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
+                </span>
               </li>
             ))
           }
