@@ -4,7 +4,6 @@ import {
   BrainIcon,
   ChevronUpIcon,
   ClipboardIcon,
-  EditIcon,
   RefreshCwIcon,
   BotIcon
 } from './Icons';
@@ -16,7 +15,8 @@ import { toast } from 'react-toastify';
 
 interface ChatMessageProps {
   message: Message;
-  refreshChatHistory:()=>void
+  refreshChatHistory: () => void
+  regenarateMessage:(chatId:string)=>void
 }
 
 const ThinkingBlock: React.FC = () => (
@@ -33,7 +33,7 @@ const ThinkingBlock: React.FC = () => (
   </div>
 );
 
-const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatHistory }) => {
+const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatHistory, regenarateMessage }) => {
   const handleDeleteChat = async () => {
     try {
       const res = await deleteChat(message?.id ?? "");
@@ -51,13 +51,12 @@ const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatH
   return (
     <div className="flex items-center space-x-3 text-gray-500 mt-3">
       <button title='Delete' className="hover:text-gray-800" onClick={handleDeleteChat}><ClipboardIcon className="w-4 h-4" /></button>
-      <button title='Edit' className="hover:text-gray-800"><EditIcon className="w-4 h-4" /></button>
-      <button title='Re-generate' className="hover:text-gray-800"><RefreshCwIcon className="w-4 h-4" /></button>
+      <button title='Re-generate' className="hover:text-gray-800" onClick={()=>regenarateMessage(message.id??"")}><RefreshCwIcon className="w-4 h-4" /></button>
     </div>
   )
 });
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory, regenarateMessage }) => {
   const isUser = message.role === 'user';
 
   const Avatar: React.FC = () => {
@@ -96,7 +95,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory }
               <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse"></div>
             )}
 
-              {!message.isThinking && message.content && <MessageActions message={message} refreshChatHistory={refreshChatHistory} />}
+              {!message.isThinking && message.content && <MessageActions message={message} refreshChatHistory={refreshChatHistory} regenarateMessage={regenarateMessage} />}
           </div>
         )}
       </div>
