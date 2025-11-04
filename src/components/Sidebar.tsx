@@ -10,16 +10,11 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, Trash2 } from 'lucide-react';
 import { ASK_MY_DATA_API_BASE_URL } from '@/constants/api.constant';
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<{id:string, originalName:string, filePath?: string}[]>([]);
   const [fileUploading, setFileUploading] = useState(false);
   const navigate = useNavigate();
-
-  const handleLogoClick = () => {
-    return navigate("/app");
-  }
-
   const handleInputClick = () => {
     if (inputRef && inputRef.current) {
       inputRef.current.click();
@@ -82,15 +77,47 @@ const Sidebar: React.FC = () => {
       handleCatchBlockError(err, 'Failed to delete file');
     }
   };
+
+  const FilesComponent = () => (
+    <ul className='h-full overflow-y-auto'>
+      {
+        files?.map(ele => (
+          <li key={ele.id} className='group flex items-center justify-between gap-2 py-1 px-1 rounded-sm hover:bg-gray-100'>
+            <span className='overflow-hidden text-ellipsis line-clamp-1'>{ele.originalName}</span>
+            <span className='flex items-center gap-1 opacity-100'>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="View file"
+                onClick={() => openFile(ele.filePath)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Delete file"
+                onClick={() => handleDelete(ele.id)}
+              >
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </Button>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  )
   
   useEffect(() => {
     getFiles();
   }, [])
-  
+  if (isMobile) {
+    return <FilesComponent/>
+  }
 
   return (
-    <aside className="w-64 shrink-0 border-r border-gray-200 flex flex-col">
-      <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2 cursor-pointer" onClick={handleLogoClick}>AskMyData</h1>
+    <aside className="hidden w-64 shrink-0 border-r border-gray-200 md:flex flex-col">
+      <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2 cursor-pointer" onClick={()=>navigate("/app")}>AskMyData</h1>
       <div className="p-4 flex-1 flex flex-col space-y-2 bg-white h-[calc(100%-48px)]">
         <input type='file' id='file' name='file' ref={inputRef} className='hidden' onChange={handleInputChange} />
         {
@@ -107,33 +134,7 @@ const Sidebar: React.FC = () => {
               </Button>
             )
         }
-        <ul className='h-full overflow-y-auto'>
-          {
-            files?.map(ele => (
-              <li key={ele.id} className='group flex items-center justify-between gap-2 py-1 px-1 rounded-sm hover:bg-gray-100'>
-                <span className='overflow-hidden text-ellipsis line-clamp-1'>{ele.originalName}</span>
-                <span className='flex items-center gap-1 opacity-100'>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="View file"
-                    onClick={() => openFile(ele.filePath)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete file"
-                    onClick={() => handleDelete(ele.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </span>
-              </li>
-            ))
-          }
-        </ul>
+        <FilesComponent/>
       </div>
     </aside>
   );

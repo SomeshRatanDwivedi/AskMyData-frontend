@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useNavigate } from 'react-router-dom';
+import { NavigationMenuDemo } from './NavigationMenu';
+
 
 const Header: React.FC = () => {
   const { stUser,stFnResetUserStore } = useUserStore(useShallow((state) => ({ stUser: state.stUser, stFnResetUserStore: state.stFnResetUserStore })));
@@ -33,7 +35,11 @@ const Header: React.FC = () => {
     return navigate("/app/settings");
   }
   return (
-    <header className="shrink-0 h-16 flex items-center justify-end px-8 border-b border-gray-200">
+    <header className="shrink-0 h-16 flex items-center justify-between md:justify-end px-8 border-b border-gray-200">
+      <div className='md:hidden flex'>
+        <NavigationMenuDemo />
+        <h1 className="text-2xl font-bold bg-white px-4 cursor-pointer" onClick={() => navigate("/app")}>AskMyData</h1>
+      </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600">{logo}</Button>
