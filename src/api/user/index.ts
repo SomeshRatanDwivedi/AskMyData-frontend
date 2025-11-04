@@ -46,3 +46,8 @@ export const enableDisableUser = async (userId: number) => {
   const response = await askMyDataApi.put(`user/${userId}/enable-disable`);
   return response.data;
 }
+
+export const makeRemoveAdmin = async (userId: number) => {
+  const response = await askMyDataApi.put(`user/${userId}/make-remove-admin`);
+  return response.data;
+}

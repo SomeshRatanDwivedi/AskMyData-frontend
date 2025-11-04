@@ -18,7 +18,8 @@ const useUserStore = create<UserStore>()(
       isAdmin:false,
       accessToken: "",
       createdAt: "",
-      updatedAt:""
+      updatedAt: "",
+      groqApiKey:""
     },
     stFnUpdateUser: (user: Partial<UserRegisterFormValueType>) => set((state: UserStore) => ({ ...state, stUser: { ...state.stUser, ...user } })),
     stFnResetUserStore: () => set(() => ({
@@ -30,7 +31,8 @@ const useUserStore = create<UserStore>()(
         isAdmin:false,
         accessToken: "",
         createdAt: "",
-        updatedAt: ""
+        updatedAt: "",
+        groqApiKey:""
       }
     }))
   }),

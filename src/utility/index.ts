@@ -50,18 +50,19 @@ const validateUserForm = (
 };
 
 const encryptMethod = (value: string | number) => {
-  return CryptoJS.AES.encrypt(value + "", SECRET_KEY).toString();
-}
+  return CryptoJS.AES.encrypt(String(value), SECRET_KEY).toString();
+};
 
-const decryptMethod = (value: string | number) => {
+const decryptMethod = (value: string) => {
   try {
-    const bytes = CryptoJS.AES.decrypt(value + "", SECRET_KEY);
-
+    const bytes = CryptoJS.AES.decrypt(String(value), SECRET_KEY);
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-
+    if (decrypted === "") {
+      console.warn("⚠ Decrypted value is an empty string");
+      return "";
+    }
     if (!decrypted) {
-      console.log("❌ Failed decryption — likely wrong key or corrupted cipher");
-      throw new Error("User input is mailformed")
+      throw new Error("Decryption failed — bad key or corrupted data");
     }
 
     return decrypted;

@@ -19,7 +19,7 @@ const App=()=> (
       draggable
       pauseOnHover
       theme="light"
-      style={{ whiteSpace: 'nowrap', width: 'fit-content' }}
+      style={{ whiteSpace: 'wrap', width: 'fit-content' }}
     />
   </div>
 )

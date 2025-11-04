@@ -4,7 +4,7 @@ import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Label } from "../../../components/ui/label";
 import { toast } from "react-toastify";
-import { handleCatchBlockError } from "@/utility";
+import { decryptMethod, encryptMethod, handleCatchBlockError } from "@/utility";
 import { getUserDetailsByUserId, updateUserProfile } from "@/api/user";
 import useUserStore from "@/stores/user.store";
 import { useShallow } from "zustand/react/shallow";
@@ -30,7 +30,7 @@ function ProfilePage() {
   const [showApiKey, setShowApiKey] = useState(false);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setUserDetails((prev) => ({ ...prev, [e.target.name]:e.target.value }));
   };
 
   const clearEditMode = () => {
@@ -45,7 +45,7 @@ function ProfilePage() {
       const payload = {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
-        groqApiKey: userDetails.groqApiKey
+        groqApiKey: encryptMethod(userDetails.groqApiKey??"")
       }
       const res = await updateUserProfile(payload);
       if (res?.success) {
@@ -134,9 +134,10 @@ function ProfilePage() {
               <Input
                 type={showApiKey ? "text" : "password"}
                 name="groqApiKey"
-                value={userDetails.groqApiKey}
+                value={decryptMethod(userDetails.groqApiKey??"")}
                 className="mt-1 bg-gray-100 mr-1"
                 onChange={handleChange}
+                disabled={!isEditing}
               />
               <Button
                 variant="outline"

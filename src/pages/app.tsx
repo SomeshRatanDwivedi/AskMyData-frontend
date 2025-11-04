@@ -10,11 +10,13 @@ function AppLayout() {
     return <Navigate to="/auth/login" />
   }
   return (
-    <div className="flex w-full justify-between h-full bg-(--theme-bg-container) font-sans text-gray-900">
+    <div className="flex w-full justify-between h-full font-sans text-gray-900">
       <Sidebar />
-      <main className="flex w-[calc(100%-272px)] flex-col bg-white">
+      <main className="flex h-full w-[calc(100%-272px)] flex-col bg-white">
         <Header />
-       <Outlet/>
+        <div className="h-[calc(100%-64px)]">
+          <Outlet />
+        </div>
       </main>
     </div>
   )
