@@ -6,13 +6,11 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import Sidebar from "./Sidebar";
 import { Button } from "./ui/button";
 import { Folder, Upload } from "lucide-react";
-import { useState } from "react";
 
 
-const MenuChild = ({ setShowFile }: { setShowFile: React.Dispatch<React.SetStateAction<boolean>> }) => (
+const MenuChild = () => (
   <div className="p-2 w-48 space-y-2">
     <Button
       variant="outline"
@@ -25,14 +23,12 @@ const MenuChild = ({ setShowFile }: { setShowFile: React.Dispatch<React.SetState
     <Button
       variant="outline"
       className="w-full flex items-center justify-start gap-2"
-      onClick={() => setShowFile((prev: boolean) => !prev)}
     >
       <Folder className="h-4 w-4" /> View stored files
     </Button>
   </div>
 )
 export function NavigationMenuDemo() {
-  const [showFile, setShowFile] = useState(false);
   return (
     <>
       <NavigationMenu>
@@ -44,15 +40,11 @@ export function NavigationMenuDemo() {
             </NavigationMenuTrigger>
 
             <NavigationMenuContent>
-              <MenuChild setShowFile={setShowFile} />
+              <MenuChild/>
             </NavigationMenuContent>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      {/* ✅ Sidebar is rendered independently */}
-      {/* {showFile && (
-        <Sidebar isMobile={true} onClose={() => setShowFile(false)} />
-      )} */}
     </>
   )
 }
