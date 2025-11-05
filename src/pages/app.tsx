@@ -11,8 +11,8 @@ function AppLayout() {
   }
   return (
     <div className="flex w-full justify-between h-full font-sans text-gray-900">
-      <Sidebar />
-      <main className="flex h-full w-[calc(100%-272px)] flex-col bg-white">
+        <Sidebar />
+      <main className="flex h-full w-full md:w-[calc(100%-272px)] flex-col bg-white">
         <Header />
         <div className="h-[calc(100%-64px)]">
           <Outlet />

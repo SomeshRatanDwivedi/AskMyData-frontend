@@ -30,7 +30,7 @@ function ProfilePage() {
   const [showApiKey, setShowApiKey] = useState(false);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setUserDetails((prev) => ({ ...prev, [e.target.name]:e.target.value }));
+    setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.name === "groqApiKey" ? encryptMethod(e.target.value??"") : e.target.value }));
   };
 
   const clearEditMode = () => {
@@ -45,7 +45,7 @@ function ProfilePage() {
       const payload = {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
-        groqApiKey: encryptMethod(userDetails.groqApiKey??"")
+        groqApiKey: userDetails.groqApiKey
       }
       const res = await updateUserProfile(payload);
       if (res?.success) {
@@ -82,7 +82,6 @@ function ProfilePage() {
       getUserDetailsId(Number(params.id))
     }
   }, [params.id])
-
   return (
     <div className="h-full bg-[#f8fafc] flex justify-center items-center">
       <Card className="w-full max-w-lg shadow-lg border border-gray-200 pt-0">
@@ -134,7 +133,11 @@ function ProfilePage() {
               <Input
                 type={showApiKey ? "text" : "password"}
                 name="groqApiKey"
-                value={decryptMethod(userDetails.groqApiKey??"")}
+                value={
+                  showApiKey
+                    ? decryptMethod(userDetails.groqApiKey ?? "")
+                    : "************"
+                }
                 className="mt-1 bg-gray-100 mr-1"
                 onChange={handleChange}
                 disabled={!isEditing}

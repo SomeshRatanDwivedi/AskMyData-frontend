@@ -7,6 +7,10 @@ export const saveChat = async (chat: ChatType) => {
   return res.data;
 }
 
+export const updateChat = async (chatId:string,chat: ChatType) => {
+  const res = await askMyDataApi.put(`/chat/edit-chat/${chatId}`, chat);
+  return res.data;
+}
 export const editChat = async (chatId: string, chat: ChatType) => {
   const res = await askMyDataApi.put(`/chat/edit-chat/${chatId}`, chat);
   return res.data;
