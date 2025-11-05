@@ -30,6 +30,7 @@ export default function useChat() {
 
   const getHistory = useCallback(async () => {
     try {
+      setIsLoading(true);
       const res = await getChat();
       if (res?.success && res.data) {
         // Ensure messages have ids
@@ -37,6 +38,8 @@ export default function useChat() {
       }
     } catch (err) {
       console.error('getHistory error', err);
+    } finally {
+      setIsLoading(false)
     }
   }, []);
 
@@ -44,8 +47,6 @@ export default function useChat() {
     async (prompt: string, chatId?: string) => {
       if (!prompt.trim()) return;
       if (isLoading) return;
-
-      setIsLoading(true);
       const userMsg: Message = {
         id: crypto.randomUUID(),
         role: 'user',
@@ -97,8 +98,6 @@ export default function useChat() {
       } catch (err) {
         console.error('sendMessage error', err);
         replaceMessage(thinkingMsg.id, { content: 'Error getting response. Try again.', isThinking: false });
-      } finally {
-        setIsLoading(false);
       }
     },
     [appendMessage, replaceMessage, isLoading, replaceUserMessageId]

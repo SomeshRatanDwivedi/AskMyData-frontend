@@ -11,6 +11,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { UserType } from "@/types";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Eye } from "lucide-react";
+import Loader from "@/components/Loader";
 
 function ProfilePage() {
   const { stUser, stFnUpdateUser } = useUserStore(useShallow((state) => ({ stUser: state.stUser, stFnUpdateUser: state.stFnUpdateUser })));
@@ -28,6 +29,7 @@ function ProfilePage() {
     updatedAt: ""
   })
   const [showApiKey, setShowApiKey] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.name === "groqApiKey" ? encryptMethod(e.target.value??"") : e.target.value }));
@@ -47,6 +49,7 @@ function ProfilePage() {
         lastName: userDetails.lastName,
         groqApiKey: userDetails.groqApiKey
       }
+      setLoading(true)
       const res = await updateUserProfile(payload);
       if (res?.success) {
         toast.success("Profile updated successfully!");
@@ -60,11 +63,14 @@ function ProfilePage() {
     } catch (err) {
       console.log("Error in handleSave: ", err);
       handleCatchBlockError(err, "Error updating stUser.")
+    } finally {
+      setLoading(false);
     }
   };
 
   const getUserDetailsId = async (id: number) => {
     try {
+      setLoading(true)
       const res = await getUserDetailsByUserId(id);
       if (res?.success) {
         setUserDetails(res.data);
@@ -74,6 +80,8 @@ function ProfilePage() {
     } catch (err) {
       console.log("Error in getUserDetailsByUserId: ", err);
       handleCatchBlockError(err, "Error fetching user details.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -82,6 +90,11 @@ function ProfilePage() {
       getUserDetailsId(Number(params.id))
     }
   }, [params.id])
+
+  if (loading) {
+    return <Loader/>
+  }
+
   return (
     <div className="h-full bg-[#f8fafc] flex justify-center items-center">
       <Card className="w-full max-w-lg shadow-lg border border-gray-200 pt-0">

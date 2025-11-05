@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash, Edit, Ban, UserCheckIcon, ShieldOff, Shield, UserPlus } from "lucide-react";
+import {Trash, Edit, Ban, UserCheckIcon, ShieldOff, Shield, UserPlus } from "lucide-react";
 import type { UserType } from "@/types";
 import { getAllUsers, enableDisableUser as enableDisableSelectedUser, deleteUser as deleteSelectedUser, makeRemoveAdmin as makeRemoveAdminSelectedUser } from "@/api/user";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ import { deleteUserFiles, getUserFiles, } from "@/api/file";
 import useUserStore from "@/stores/user.store";
 import { useShallow } from "zustand/react/shallow";
 import CreateUserModal from "@/components/CreateUserModal";
+import Loader from "@/components/Loader";
 
 const AdminSettingsPage = () => {
   const stUser = useUserStore(useShallow((state) => state.stUser));
@@ -143,6 +144,10 @@ const AdminSettingsPage = () => {
     return navigate("/app")
   }
 
+  if (loading) {
+    return <Loader/>
+  }
+
   return (
     <div className="p-6 h-full">
       <Card className="shadow-md h-full">
@@ -161,11 +166,6 @@ const AdminSettingsPage = () => {
         </CardHeader>
 
         <CardContent className="h-full overflow-y-auto">
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="animate-spin h-6 w-6" />
-            </div>
-          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -251,7 +251,6 @@ const AdminSettingsPage = () => {
                 ))}
               </TableBody>
             </Table>
-          )}
         </CardContent>
       </Card>
       <UserFilesModal clickedUser={clickedUser} open={open} onClose={() => setOpen(false)} files={files} onDelete={onFileDelete} />
