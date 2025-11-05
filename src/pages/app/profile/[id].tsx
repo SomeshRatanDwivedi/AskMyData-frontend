@@ -11,6 +11,8 @@ import { useShallow } from "zustand/react/shallow";
 import type { UserType } from "@/types";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Eye } from "lucide-react";
+import Loader from "@/components/Loader";
+import { Spinner } from "@/components/ui/spinner";
 
 function ProfilePage() {
   const { stUser, stFnUpdateUser } = useUserStore(useShallow((state) => ({ stUser: state.stUser, stFnUpdateUser: state.stFnUpdateUser })));
@@ -28,9 +30,11 @@ function ProfilePage() {
     updatedAt: ""
   })
   const [showApiKey, setShowApiKey] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.name === "groqApiKey" ? encryptMethod(e.target.value??"") : e.target.value }));
+    setUserDetails((prev) => ({ ...prev, [e.target.name]: e.target.name === "groqApiKey" ? encryptMethod(e.target.value ?? "") : e.target.value }));
   };
 
   const clearEditMode = () => {
@@ -40,13 +44,13 @@ function ProfilePage() {
   };
 
   const handleSave = async () => {
-    setIsEditing(false);
     try {
       const payload = {
         firstName: userDetails.firstName,
         lastName: userDetails.lastName,
         groqApiKey: userDetails.groqApiKey
       }
+      setLoadingAction(true)
       const res = await updateUserProfile(payload);
       if (res?.success) {
         toast.success("Profile updated successfully!");
@@ -60,11 +64,15 @@ function ProfilePage() {
     } catch (err) {
       console.log("Error in handleSave: ", err);
       handleCatchBlockError(err, "Error updating stUser.")
+    } finally {
+      setLoadingAction(false);
+      setIsEditing(false);
     }
   };
 
   const getUserDetailsId = async (id: number) => {
     try {
+      setLoading(true)
       const res = await getUserDetailsByUserId(id);
       if (res?.success) {
         setUserDetails(res.data);
@@ -74,6 +82,8 @@ function ProfilePage() {
     } catch (err) {
       console.log("Error in getUserDetailsByUserId: ", err);
       handleCatchBlockError(err, "Error fetching user details.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -82,6 +92,11 @@ function ProfilePage() {
       getUserDetailsId(Number(params.id))
     }
   }, [params.id])
+
+  if (loading) {
+    return <Loader />
+  }
+
   return (
     <div className="h-full bg-[#f8fafc] flex justify-center items-center">
       <Card className="w-full max-w-lg shadow-lg border border-gray-200 pt-0">
@@ -182,15 +197,22 @@ function ProfilePage() {
                     clearEditMode();
                     setIsEditing(false);
                   }}
-                  className="border-gray-400 text-gray-600"
+                    className="border-gray-400 text-gray-600"
+                    disabled={loadingAction}
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSave}
-                  className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={loadingAction}
                 >
-                  Save
+                  {
+                    loadingAction ? <>
+                      <Spinner />
+                      Saving...
+                    </> : "Save"
+                  }
                 </Button>
               </div>
             )}

@@ -9,11 +9,13 @@ import { getUserFiles, uploadFile, deleteUserFiles } from '@/api/file';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Trash2 } from 'lucide-react';
 import { ASK_MY_DATA_API_BASE_URL } from '@/constants/api.constant';
+import Loader from './Loader';
 
 const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<{id:string, originalName:string, filePath?: string}[]>([]);
   const [fileUploading, setFileUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleInputClick = () => {
     if (inputRef && inputRef.current) {
@@ -46,6 +48,7 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
 
   const getFiles = async () => {
     try {
+      setLoading(true);
       const res = await getUserFiles();
       if (res?.success) {
         setFiles(res.data);
@@ -54,6 +57,8 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
       }
     } catch (err) {
       handleCatchBlockError(err, "Error in getting files.")
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -110,7 +115,8 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
   
   useEffect(() => {
     getFiles();
-  }, [])
+  }, []);
+  
   if (isMobile) {
     return <FilesComponent/>
   }
@@ -134,7 +140,8 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
               </Button>
             )
         }
-        <FilesComponent/>
+        {loading ? <Loader /> : <FilesComponent />}
+        
       </div>
     </aside>
   );

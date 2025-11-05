@@ -3,23 +3,26 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash, Edit, Ban, UserCheckIcon, ShieldOff, Shield, UserPlus } from "lucide-react";
+import { Trash, Edit, Ban, UserCheckIcon, ShieldOff, Shield, UserPlus } from "lucide-react";
 import type { UserType } from "@/types";
 import { getAllUsers, enableDisableUser as enableDisableSelectedUser, deleteUser as deleteSelectedUser, makeRemoveAdmin as makeRemoveAdminSelectedUser } from "@/api/user";
 import { toast } from "react-toastify";
 import { handleCatchBlockError } from "@/utility";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UserFilesModal from "@/components/UserFilesModal";
 import { deleteUserFiles, getUserFiles, } from "@/api/file";
 import useUserStore from "@/stores/user.store";
 import { useShallow } from "zustand/react/shallow";
 import CreateUserModal from "@/components/CreateUserModal";
+import Loader from "@/components/Loader";
+import { Spinner } from "@/components/ui/spinner";
 
 const AdminSettingsPage = () => {
   const stUser = useUserStore(useShallow((state) => state.stUser));
   const [users, setUsers] = useState<UserType[]>([]);
   const [clickedUser, setClickedUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoader, setActionLoader] = useState('');
   const [open, setOpen] = useState(false);
   const [openCreateUserModal, setOpenCreateUserModal] = useState(false);
   const [files, setFiles] = useState([]);
@@ -84,35 +87,41 @@ const AdminSettingsPage = () => {
 
   }, [clickedUser, handleOpenFiles]);
   // ✅ Disable User
-  const enableDisableUser = async (user:UserType) => {
+  const enableDisableUser = async (user: UserType) => {
     try {
       if (!user.userId) return;
+      setActionLoader(`enableDisable-${user.userId}`);
       const res = await enableDisableSelectedUser(user.userId);
       if (res?.success) {
-        toast.success(`User ${user.isActive ? "Disabled" :"Enabled"} successfully.`);
-        getUsers();
+        toast.success(`User ${user.isActive ? "Disabled" : "Enabled"} successfully.`);
+        setUsers((prev) => prev.map(ele => (user.userId === ele.userId ? { ...ele, isActive: !ele.isActive } : ele)));
       } else {
         toast.error(res.message);
       }
     } catch (error) {
       console.error("Failed to disable user:", error);
       handleCatchBlockError(error, "Failed to disable user");
+    } finally {
+      setActionLoader("");
     }
   };
 
   const makeRemoveAdmin = async (user: UserType) => {
     try {
       if (!user.userId) return;
+      setActionLoader(`makeRemoveAdmin-${user.userId}`);
       const res = await makeRemoveAdminSelectedUser(user.userId);
       if (res?.success) {
         toast.success(`User has been ${user.isAdmin ? "removed" : "made"} as an admin.`);
-        getUsers();
+        setUsers((prev) => prev.map(ele => (user.userId === ele.userId ? { ...ele, isAdmin: !ele.isAdmin } : ele)));
       } else {
         toast.error(res.message);
       }
     } catch (error) {
       console.error("Failed to disable user:", error);
       handleCatchBlockError(error, "Failed to disable user");
+    } finally {
+      setActionLoader("")
     }
   };
 
@@ -122,7 +131,7 @@ const AdminSettingsPage = () => {
       const res = await deleteSelectedUser(userId ?? 0);
       if (res?.success) {
         toast.success("User deleted successfully.");
-        getUsers();
+        setUsers((prev) => prev.filter(ele => ele.userId !== userId));
       } else {
         toast.error(res.message);
       }
@@ -143,6 +152,10 @@ const AdminSettingsPage = () => {
     return navigate("/app")
   }
 
+  if (loading) {
+    return <Loader />
+  }
+
   return (
     <div className="p-6 h-full">
       <Card className="shadow-md h-full">
@@ -152,7 +165,7 @@ const AdminSettingsPage = () => {
             <Button
               size="sm"
               className="bg-indigo-500 text-white hover:bg-indigo-600"
-              onClick={()=>setOpenCreateUserModal(true)}
+              onClick={() => setOpenCreateUserModal(true)}
             >
               <UserPlus className="h-4 w-4 mr-1" />
               Create User
@@ -161,101 +174,108 @@ const AdminSettingsPage = () => {
         </CardHeader>
 
         <CardContent className="h-full overflow-y-auto">
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="animate-spin h-6 w-6" />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Files</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Admin</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="h-[calc(100%-566px)] overflow-y-auto">
-                {users.map((user) => (
-                  <TableRow key={user.userId}>
-                    <TableCell className="cursor-pointer" onClick={() => handleUserClick(user.userId ?? 0)}>{user.firstName} {user.lastName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell className="cursor-pointer" onClick={() => handleOpenFiles(user)}>{user?.filesCount || 0}</TableCell>
-                    <TableCell>
-                      {user?.isActive ? (
-                        <Badge className="bg-green-500">Active</Badge>
-                      ) : (
-                        <Badge variant="destructive">Disabled</Badge>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Files</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Admin</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="h-[calc(100%-566px)] overflow-y-auto">
+              {users.map((user) => (
+                <TableRow key={user.userId}>
+                  <TableCell className="cursor-pointer" onClick={() => handleUserClick(user.userId ?? 0)}>{user.firstName} {user.lastName}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => handleOpenFiles(user)}>{user?.filesCount || 0}</TableCell>
+                  <TableCell>
+                    {user?.isActive ? (
+                      <Badge className="bg-green-500">Active</Badge>
+                    ) : (
+                      <Badge variant="destructive">Disabled</Badge>
 
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user?.isAdmin ? (
-                        <Badge className="bg-green-500">Admin</Badge>
-                      ) : (
-                        <Badge variant="destructive">User</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => handleUserClick(user.userId ?? 0, true)}>
-                        <Edit className="h-4 w-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => enableDisableUser(user)}
-                        disabled={user.userId === stUser.userId}
-                      >
-                        {
-                          user?.isActive ? <Ban className="h-4 w-4 mr-1 text-red-500" />
-                            : <UserCheckIcon className="h-4 w-4 mr-1 text-green-500" />
-                        }
-                        {
-                          user?.isActive ? "Disable" : "Enable"
-                        }
-                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {user?.isAdmin ? (
+                      <Badge className="bg-green-500">Admin</Badge>
+                    ) : (
+                      <Badge variant="destructive">User</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button size="sm" variant="outline" onClick={() => handleUserClick(user.userId ?? 0, true)}>
+                      <Edit className="h-4 w-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => enableDisableUser(user)}
+                      disabled={user.userId === stUser.userId}
+                    >
+                      {
+                        (actionLoader.split('-')?.[0] === "enableDisable" && Number(actionLoader.split('-')?.[1]) === user.userId) ? <Spinner className="h-4 w-4 mr-1" /> : <>
 
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteUser(user.userId ?? 0)}
-                        disabled={user.userId === stUser.userId}
-                      >
-                        <Trash className="h-4 w-4 mr-1" /> Delete
-                      </Button>
+                          {
+                            user?.isActive ? <Ban className="h-4 w-4 mr-1 text-red-500" />
+                              : <UserCheckIcon className="h-4 w-4 mr-1 text-green-500" />
+                          }
+                        </>
+                      }
 
                       {
-                        user.userId !== stUser.userId && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className={
-                              user?.isAdmin
-                                ? "bg-red-500 text-white"   // removing admin
-                                : "bg-indigo-500 text-white" // making admin
-                            }
-                            onClick={() => makeRemoveAdmin(user)}
-                            disabled={user.userId === stUser.userId}
-                          >
-                            {user?.isAdmin
-                              ? <ShieldOff className="h-4 w-4 mr-1" />
-                              : <Shield className="h-4 w-4 mr-1" />}
-                            {user?.isAdmin ? "Remove as Admin" : "Make as Admin"}
-                          </Button>
-                        )
+                        user?.isActive ? "Disable" : "Enable"
                       }
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteUser(user.userId ?? 0)}
+                      disabled={user.userId === stUser.userId}
+                    >
+                      <Trash className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+
+                    {
+                      user.userId !== stUser.userId && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className={
+                            user?.isAdmin
+                              ? "bg-red-500 text-white"   // removing admin
+                              : "bg-indigo-500 text-white" // making admin
+                          }
+                          onClick={() => makeRemoveAdmin(user)}
+                          disabled={user.userId === stUser.userId}
+                        >
+                          {
+                            (actionLoader.split('-')?.[0] === "makeRemoveAdmin" && Number(actionLoader.split('-')?.[1]) === user.userId) ?
+                              <Spinner className="h-4 w-4 mr-1" /> : <>
+                                {
+                                  user?.isAdmin
+                                    ? <ShieldOff className="h-4 w-4 mr-1" />
+                                    : <Shield className="h-4 w-4 mr-1" />
+                                }
+                              </>
+                          }
+                          {user?.isAdmin ? "Remove as Admin" : "Make as Admin"}
+                        </Button>
+                      )
+                    }
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
       <UserFilesModal clickedUser={clickedUser} open={open} onClose={() => setOpen(false)} files={files} onDelete={onFileDelete} />
-      <CreateUserModal open={openCreateUserModal} setOpen={setOpenCreateUserModal}/>
+      <CreateUserModal open={openCreateUserModal} setOpen={setOpenCreateUserModal} />
     </div>
   );
 };

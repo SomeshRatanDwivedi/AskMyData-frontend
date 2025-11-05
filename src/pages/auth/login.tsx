@@ -1,5 +1,5 @@
-import { memo, useCallback, useState } from "react";
-import type {UserLoginFormValueType, UserRegisterFormValueType } from "../../types";
+import {useCallback, useEffect, useState } from "react";
+import type { UserLoginFormValueType, UserRegisterFormValueType } from "../../types";
 import { login, signup } from "../../api/user";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,8 +10,8 @@ import { encryptMethod } from "@/utility";
 import useUserStore from "@/stores/user.store";
 import { useShallow } from 'zustand/react/shallow'
 
-const LoginPage=()=> {
-  const stFnUpdateUser = useUserStore(useShallow((state)=>state.stFnUpdateUser))
+const LoginPage = () => {
+  const { stFnUpdateUser, stUser } = useUserStore(useShallow((state) => ({ stFnUpdateUser: state.stFnUpdateUser, stUser: state.stUser })))
   const [showLogin, setShowLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -56,18 +56,22 @@ const LoginPage=()=> {
       toast.error(axiosError.response?.data?.message || "Signup failed");
     }
   }, []);
-  
+
   const handleShowPassword = useCallback(() => {
     setShowLogin((prev) => !prev)
   }, [])
 
+  useEffect(() => {
+    if (stUser?.accessToken) {
+      navigate("/app");
+    }
+  }, [stUser, navigate]);
+
   return showLogin ? (
     <Login onLogin={handleLogin} switchToSignup={handleShowPassword} loading={loading} />
   ) : (
-      <Signup onSignup={handleSignup} switchToLogin={handleShowPassword} loading={loading} />
+    <Signup onSignup={handleSignup} switchToLogin={handleShowPassword} loading={loading} />
   );
 }
 
-export default memo(LoginPage);
-
-//shivamchaubey@gmail.com
+export default LoginPage;
