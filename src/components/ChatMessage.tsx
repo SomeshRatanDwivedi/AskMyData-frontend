@@ -78,7 +78,7 @@ const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatH
     <div className="flex items-center space-x-3 text-gray-500 mt-3">
       <button title='Copy' className="hover:text-gray-800" onClick={handleCopyChat}><CopyIcon className="w-4 h-4" /></button>
       {
-        message.role ==='model' &&
+        message.role ==='model' && message?.id!=="-1" &&
         <>
           <button title='Delete' className="hover:text-gray-800" onClick={handleDeleteChat}><ClipboardIcon className="w-4 h-4" /></button>
           <button title='Re-generate' className="hover:text-gray-800" onClick={() => regenarateMessage(message.id ?? "")}><RefreshCwIcon className="w-4 h-4" /></button>

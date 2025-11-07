@@ -20,8 +20,8 @@ export default function useChat() {
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...newMsg } : m)));
   }, []);
 
-  const replaceUserMessageId = useCallback((id: string, newId:string) => {
-    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, id:newId } : m)));
+  const replaceUserMessageId = useCallback((id: string, newId: string) => {
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, id: newId } : m)));
   }, []);
 
   // remove message by id
@@ -35,7 +35,17 @@ export default function useChat() {
       const res = await getChat();
       if (res?.success && res.data) {
         // Ensure messages have ids
-        setMessages(res.data.map((m: Message) => ({ ...m, id: m.id ?? crypto.randomUUID() })));
+        if (res.data.length > 0) {
+          setMessages(res.data);
+        } else {
+          setMessages([{
+            id: "-1",
+            role: 'model',
+            content: '👋 Welcome! How can I help you today?',
+            isThinking: false,
+          }]);
+        }
+
       }
     } catch (err) {
       console.error('getHistory error', err);
@@ -75,13 +85,13 @@ export default function useChat() {
           let newRecord;
           if (!chatId) {
             try {
-              newRecord=await saveChat(record);
+              newRecord = await saveChat(record);
             } catch (e) {
               console.warn('saveChat failed', e);
             }
           } else {
             try {
-              newRecord=await updateChat(chatId, record);
+              newRecord = await updateChat(chatId, record);
             } catch (e) {
               console.warn('updateChat failed', e);
             }
@@ -96,11 +106,11 @@ export default function useChat() {
             isThinking: false,
           });
         }
-      } catch (err:unknown) {
+      } catch (err: unknown) {
         console.error('sendMessage error', err);
         const newErr = err as AxiosError<{ message: string }>;
         if (newErr?.status === 429) {
-          replaceMessage(thinkingMsg.id, { content: newErr.response?.data?.message, isThinking: false, errorType: 'rate-limit'});
+          replaceMessage(thinkingMsg.id, { content: newErr.response?.data?.message, isThinking: false, errorType: 'rate-limit' });
         } else {
           replaceMessage(thinkingMsg.id, { content: 'Error getting response. Try again.', isThinking: false });
         }
