@@ -5,7 +5,8 @@ export interface Message {
   role: Role;
   content: string;
   isThinking?: boolean;
-  id:string
+  id: string;
+  errorType?:string
 }
 
 export type UserLoginFormValueType = {

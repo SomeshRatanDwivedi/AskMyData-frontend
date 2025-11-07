@@ -1,5 +1,5 @@
 
-import React,{memo} from 'react';
+import React, { memo } from 'react';
 import {
   BrainIcon,
   ChevronUpIcon,
@@ -11,12 +11,28 @@ import type { Message } from '@/types';
 import { handleCatchBlockError } from '@/utility';
 import { deleteChat } from '@/api/chat/intex';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import useUserStore from '@/stores/user.store';
+import { CopyIcon } from 'lucide-react';
 
 
 interface ChatMessageProps {
   message: Message;
   refreshChatHistory: () => void
-  regenarateMessage:(chatId:string)=>void
+  regenarateMessage: (chatId: string) => void
+}
+
+
+function RateLimitMessage({ content }: { content: string }) {
+  const userId=useUserStore((state) => state.stUser?.userId);
+  const navigate = useNavigate();
+  return (
+    <div className="w-full bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg p-4 my-3 text-sm">
+      <strong>Rate limit reached.</strong><br />
+      {content}<br />
+      Please add your API key in the <span onClick={() => navigate(`/app/profile/${userId}`)} className="font-bold cursor-pointer underline">Profile</span> page.
+    </div>
+  );
 }
 
 const ThinkingBlock: React.FC = () => (
@@ -48,10 +64,27 @@ const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatH
       handleCatchBlockError(err, "Error deleting chat:");
     }
   }
+
+  const handleCopyChat = async() => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      toast.success("Chat copied to clipboard.");
+    } catch (err) {
+      console.log("Error in handleCopyChat: ", err);
+      toast.error("Error copying chat to clipboard.");
+    }
+  }
   return (
     <div className="flex items-center space-x-3 text-gray-500 mt-3">
-      <button title='Delete' className="hover:text-gray-800" onClick={handleDeleteChat}><ClipboardIcon className="w-4 h-4" /></button>
-      <button title='Re-generate' className="hover:text-gray-800" onClick={()=>regenarateMessage(message.id??"")}><RefreshCwIcon className="w-4 h-4" /></button>
+      <button title='Copy' className="hover:text-gray-800" onClick={handleCopyChat}><CopyIcon className="w-4 h-4" /></button>
+      {
+        message.role ==='model' &&
+        <>
+          <button title='Delete' className="hover:text-gray-800" onClick={handleDeleteChat}><ClipboardIcon className="w-4 h-4" /></button>
+          <button title='Re-generate' className="hover:text-gray-800" onClick={() => regenarateMessage(message.id ?? "")}><RefreshCwIcon className="w-4 h-4" /></button>
+        </>
+      }
+
     </div>
   )
 });
@@ -77,13 +110,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory, 
   return (
     <div className="flex items-start space-x-4">
       <Avatar />
+      <div>
       <div className="flex-1">
         {isUser ? (
           <p className="font-semibold text-gray-800">{message.content}</p>
         ) : (
           <div className="space-y-4">
             {message.isThinking && <ThinkingBlock />}
-            {message.content ? (
+            {message?.errorType === 'rate-limit' && <RateLimitMessage content={message.content} />}
+              {!message?.errorType && message.content ? (
               <div className="prose max-w-none text-gray-800">
                 {message.content.split('\n').map((line, i) => (
                   <p key={i} className={line.trim() === '' ? 'h-4' : ''}>
@@ -94,10 +129,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, refreshChatHistory, 
             ) : (
               <div className="h-5 w-2/3 bg-gray-200 rounded animate-pulse"></div>
             )}
-
-              {!message.isThinking && message.content && <MessageActions message={message} refreshChatHistory={refreshChatHistory} regenarateMessage={regenarateMessage} />}
           </div>
         )}
+      </div>
+        {!message.isThinking && !message?.errorType && message.content && <MessageActions message={message} refreshChatHistory={refreshChatHistory} regenarateMessage={regenarateMessage} />}
       </div>
     </div>
   );

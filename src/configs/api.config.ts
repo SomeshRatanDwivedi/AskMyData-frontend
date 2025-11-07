@@ -15,11 +15,12 @@ export function requestHandler(err: AxiosError) {
 
 
 export async function responseHandler(err: AxiosError) {
-  if (err?.response?.status === 403) {
+  if (err?.response?.status === 403 || err?.response?.status === 401) {
     useUserStore.getState().stFnResetUserStore();
     localStorage.clear();
     window.location.href = "/auth/login";
-    return Promise.reject(err as Error);
+  } else if (err.message === "Network Error") {
+    window.location.href = "/error";
   }
   return Promise.reject(err as Error);
 }

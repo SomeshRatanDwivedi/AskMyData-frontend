@@ -8,7 +8,12 @@ import { askMyDataApi } from "../instance";
  * @returns token and user info
  */
 export const login = async (userInfo: UserLoginFormValueType) => {
-  const response = await askMyDataApi.post("user/login", userInfo);
+  const response = await askMyDataApi.post("user/login", {}, {
+    auth: {
+      username: userInfo.email,
+      password: userInfo.password
+    }
+  });
   return response.data;
 };
 
