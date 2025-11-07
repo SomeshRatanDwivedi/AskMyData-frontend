@@ -18,7 +18,7 @@ import { CopyIcon } from 'lucide-react';
 
 interface ChatMessageProps {
   message: Message;
-  refreshChatHistory: () => void
+  refreshChatHistory: (chatId:string) => void
   regenarateMessage: (chatId: string) => void
 }
 
@@ -55,7 +55,7 @@ const MessageActions: React.FC<ChatMessageProps> = memo(({ message, refreshChatH
       const res = await deleteChat(message?.id ?? "");
       if (res?.success) {
         toast.success("Chat deleted successfully.");
-        refreshChatHistory()
+        refreshChatHistory(message?.id ?? "");
       } else {
         toast.error(res?.message);
       }
