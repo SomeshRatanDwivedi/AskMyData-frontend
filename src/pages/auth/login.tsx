@@ -32,6 +32,7 @@ const LoginPage = () => {
       }
     } catch (error: unknown) {
       setLoading(false);
+      console.error("Error while login: ", error)
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || "Login failed");
     }

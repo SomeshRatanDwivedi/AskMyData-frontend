@@ -1,6 +1,7 @@
 import { askQuestion } from "@/api/ai";
 import { getChat, saveChat, updateChat } from "@/api/chat/intex";
 import type { ChatType, Message } from "@/types";
+import type { AxiosError } from "axios";
 import { useCallback, useState } from "react";
 
 
@@ -95,9 +96,15 @@ export default function useChat() {
             isThinking: false,
           });
         }
-      } catch (err) {
+      } catch (err:unknown) {
         console.error('sendMessage error', err);
-        replaceMessage(thinkingMsg.id, { content: 'Error getting response. Try again.', isThinking: false });
+        const newErr = err as AxiosError<{ message: string }>;
+        if (newErr?.status === 429) {
+          replaceMessage(thinkingMsg.id, { content: newErr.response?.data?.message, isThinking: false, errorType: 'rate-limit'});
+        } else {
+          replaceMessage(thinkingMsg.id, { content: 'Error getting response. Try again.', isThinking: false });
+        }
+
       }
     },
     [appendMessage, replaceMessage, isLoading, replaceUserMessageId]
