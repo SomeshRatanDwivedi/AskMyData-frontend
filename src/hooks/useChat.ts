@@ -146,6 +146,7 @@ export default function useChat() {
     getHistory,
     sendMessage,
     regenerate,
+    removeMessage,
     setMessages, // exposed for advanced use
   } as const;
 }

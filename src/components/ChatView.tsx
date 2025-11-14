@@ -14,6 +14,7 @@ const ChatView: React.FC = () => {
     getHistory,
     sendMessage,
     regenerate,
+    removeMessage
   } = useChat();
 
   const scrollToBottom = () => {
@@ -34,7 +35,7 @@ const ChatView: React.FC = () => {
             <div className="max-w-3xl">
               <div className="space-y-8">
                 {messages.map((msg, ind) => (
-                  <ChatMessage key={ind} message={msg} refreshChatHistory={getHistory} regenarateMessage={regenerate} />
+                  <ChatMessage key={ind} message={msg} refreshChatHistory={removeMessage} regenarateMessage={regenerate} />
                 ))}
               </div>
               <div ref={messagesEndRef} />
