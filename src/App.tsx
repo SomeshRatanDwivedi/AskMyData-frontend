@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css';
 
 const App=()=> (
-  <div className="h-screen bg-(--theme-bg-container) p-4">
+  <div className="h-screen bg-(--theme-bg-container) sm:p-4">
     <MainRouter />
     <ToastContainer
       limit={1}
