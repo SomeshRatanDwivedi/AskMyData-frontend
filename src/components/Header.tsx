@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useNavigate } from 'react-router-dom';
-import { NavigationMenuDemo } from './NavigationMenu';
+import { AppDrawer } from './AppDrawer';
 
 
 const Header: React.FC = () => {
@@ -37,7 +37,7 @@ const Header: React.FC = () => {
   return (
     <header className="shrink-0 h-16 flex items-center justify-between md:justify-end px-8 border-b border-gray-200">
       <div className='md:hidden flex'>
-        <NavigationMenuDemo />
+        <AppDrawer />
         <h1 className="text-2xl font-bold bg-white px-4 cursor-pointer" onClick={() => navigate("/app")}>AskMyData</h1>
       </div>
       <DropdownMenu>

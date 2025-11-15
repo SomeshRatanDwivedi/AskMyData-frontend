@@ -11,9 +11,9 @@ import { Eye, Trash2 } from 'lucide-react';
 import { ASK_MY_DATA_API_BASE_URL } from '@/constants/api.constant';
 import Loader from './Loader';
 
-const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
+const Sidebar: React.FC<{ className?: string }> = ({ className = "h-[calc(100%-64px)]" }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<{id:string, originalName:string, filePath?: string}[]>([]);
+  const [files, setFiles] = useState<{ id: string, originalName: string, filePath?: string }[]>([]);
   const [fileUploading, setFileUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
       inputRef.current.click();
     }
   }
-  const handleInputChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     // access the selected files via event.target.files
     try {
       const selected = event.target.files?.[0] ?? null;
@@ -32,7 +32,7 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
       formData.append('file', selected);
       const res = await uploadFile(formData);
       if (res?.success) {
-        setFiles((prev)=>[...prev, res?.data])
+        setFiles((prev) => [...prev, res?.data])
         toast.success("File uploaded successfully.")
       } else {
         toast.error(res?.message);
@@ -84,7 +84,7 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
   };
 
   const FilesComponent = () => (
-    <ul className='h-full overflow-y-auto'>
+    <ul className='h-full overflow-y-auto mt-1 md:mt-0'>
       {
         files?.map(ele => (
           <li key={ele.id} className='group flex items-center justify-between gap-2 py-1 px-1 rounded-sm hover:bg-gray-100'>
@@ -116,15 +116,12 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
   useEffect(() => {
     getFiles();
   }, []);
-  
-  if (isMobile) {
-    return <FilesComponent/>
-  }
+
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-gray-200 md:flex flex-col">
-      <h1 className="text-2xl font-bold mb-4 bg-white px-4 py-2 cursor-pointer" onClick={()=>navigate("/app")}>AskMyData</h1>
-      <div className="p-4 flex-1 flex flex-col space-y-2 bg-white h-[calc(100%-48px)]">
+    <aside className="h-full w-full md:w-64 shrink-0 border-r border-gray-200 md:flex flex-col">
+      <h1 className="hidden md:block text-2xl font-bold md:mb-4 bg-white px-4 py-2 cursor-pointer" onClick={() => navigate("/app")}>AskMyData</h1>
+      <div className={`md:p-4 p-2 flex-1 flex flex-col space-y-2 bg-white ${className}`}>
         <input type='file' id='file' name='file' ref={inputRef} className='hidden' onChange={handleInputChange} />
         {
           !fileUploading ? (
@@ -136,7 +133,7 @@ const Sidebar: React.FC<{isMobile?:boolean}> = ({isMobile=false}) => {
             (
               <Button variant="outline" className='cursor-pointer bg-indigo-500 text-white' disabled>
                 <Spinner />
-                  File Uploading
+                File Uploading
               </Button>
             )
         }
