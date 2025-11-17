@@ -27,6 +27,11 @@ export const signup = async (userInfo: UserRegisterFormValueType) => {
   return response.data;
 };
 
+export const verifyOtp = async (userInfo: {otp:string, email:string}) => {
+  const response = await askMyDataApi.post("user/otp-verification", userInfo);
+  return response.data;
+};
+
 export const updateUserProfile = async (userInfo: Partial<UserRegisterFormValueType>) => {
   const response = await askMyDataApi.put("user/edit-profile", userInfo);
   return response.data;
