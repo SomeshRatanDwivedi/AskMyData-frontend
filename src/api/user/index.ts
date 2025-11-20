@@ -61,3 +61,8 @@ export const makeRemoveAdmin = async (userId: number) => {
   const response = await askMyDataApi.put(`user/${userId}/make-remove-admin`);
   return response.data;
 }
+
+export const loginWithGoogle = async (credentials: string) => {
+  const response = await askMyDataApi.post("user/auth/google", {idToken:credentials});
+  return response.data;
+}

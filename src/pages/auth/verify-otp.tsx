@@ -1,11 +1,15 @@
 import { verifyOtp } from "@/api/user";
+import useUserStore from "@/stores/user.store";
 import React, { useState, useRef, type ChangeEvent, type KeyboardEvent, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useShallow } from "zustand/react/shallow";
 
 
 
-const OTPVerification: React.FC = () => {
+const OTPVerification = () => {
+  const { stUser } = useUserStore(useShallow((state) => ({ stUser: state.stUser })));
+  const { userId, accessToken } = stUser;
   const digits = 6;
   const [searchParams] = useSearchParams();
   const [otp, setOtp] = useState<string[]>(Array(digits).fill(""));
@@ -104,6 +108,9 @@ const OTPVerification: React.FC = () => {
     return () => clearInterval(interval);
   }, [])
 
+  if (userId && accessToken) {
+    return navigate("/app")
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
@@ -162,7 +169,7 @@ const OTPVerification: React.FC = () => {
         {/* Resend */}
         <p className="text-center mt-4 text-gray-500 text-sm">
           Didn’t receive the code?{" "}
-          <button disabled={timeLeft!=='0:00'} className="text-indigo-600 hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed! disabled:hover:no-underline">
+          <button disabled={timeLeft !== '0:00'} className="text-indigo-600 hover:underline font-medium disabled:text-gray-400 disabled:cursor-not-allowed! disabled:hover:no-underline">
             Resend OTP
           </button>
         </p>
