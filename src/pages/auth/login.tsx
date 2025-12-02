@@ -45,8 +45,8 @@ const LoginPage = () => {
       formValue = { ...formValue, password: encryptMethod(formValue.password) }
       const res = await signup(formValue);
       if (res.success) {
-        toast.success("Signup successful! Please log in.");
-        setShowLogin(true);
+        toast.success("OTP sent to your email");
+        navigate(`/auth/verify-otp?email=${formValue.email}&expirey=${res.data}`);
       } else {
         toast.error("Signup failed: " + res.message);
         setLoading(false)
@@ -56,7 +56,7 @@ const LoginPage = () => {
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || "Signup failed");
     }
-  }, []);
+  }, [navigate]);
 
   const handleShowPassword = useCallback(() => {
     setShowLogin((prev) => !prev)

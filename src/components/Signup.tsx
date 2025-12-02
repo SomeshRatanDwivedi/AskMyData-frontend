@@ -52,7 +52,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup, switchToLogin, loading }) => 
     return inputType;
   }
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-full bg-gray-100">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Signup</h1>
       <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 w-80">
         {

@@ -27,6 +27,11 @@ export const signup = async (userInfo: UserRegisterFormValueType) => {
   return response.data;
 };
 
+export const verifyOtp = async (userInfo: {otp:string, email:string}) => {
+  const response = await askMyDataApi.post("user/otp-verification", userInfo);
+  return response.data;
+};
+
 export const updateUserProfile = async (userInfo: Partial<UserRegisterFormValueType>) => {
   const response = await askMyDataApi.put("user/edit-profile", userInfo);
   return response.data;
@@ -54,5 +59,10 @@ export const enableDisableUser = async (userId: number) => {
 
 export const makeRemoveAdmin = async (userId: number) => {
   const response = await askMyDataApi.put(`user/${userId}/make-remove-admin`);
+  return response.data;
+}
+
+export const loginWithGoogle = async (credentials: string) => {
+  const response = await askMyDataApi.post("user/auth/google", {idToken:credentials});
   return response.data;
 }

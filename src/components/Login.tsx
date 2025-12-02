@@ -3,6 +3,7 @@ import type { UserLoginFormValueErrorType, UserLoginFormValueType } from "../typ
 import { validateUserForm } from "../utility";
 import { USER_INPUTS_INFO_LOGIN } from "@/constants";
 import { Checkbox } from "./ui/checkbox";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 interface LoginProps {
   loading?: boolean;
@@ -16,8 +17,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, switchToSignup, loading }) => {
     password: ""
   });
   const [error, setError] = useState<UserLoginFormValueErrorType>({
-    emailError:"",
-    passwordError:"",
+    emailError: "",
+    passwordError: "",
   });
   const [showPassword, setShowPassword] = useState(false);
  
@@ -81,13 +82,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, switchToSignup, loading }) => {
           />
           <label htmlFor="showPassword" className="text-gray-700">Show Password</label>
         </div>
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+        <div className="w-full flex justify-between">
+          <button
+            type="submit"
+            className="w-[130px] px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+          <GoogleLoginButton/>
+        </div>
       </form>
       <p className="mt-4 text-gray-700">
         Don’t have an account?{" "}

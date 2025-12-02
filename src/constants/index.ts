@@ -45,7 +45,7 @@ export const USER_INPUTS_INFO_LOGIN = [
     placeHolder: "Enter your email",
     className:
       "w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400",
-    autoComplete: "off"
+    autoComplete: "on"
   },
   {
     type: "password",
@@ -54,7 +54,7 @@ export const USER_INPUTS_INFO_LOGIN = [
     placeHolder: "Enter your password",
     className:
       "w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400",
-    autoComplete: "new-password"
+    autoComplete: "on"
   }
 ];
 
