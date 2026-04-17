@@ -1,0 +1,38 @@
+{
+  "enabledPlugins": {
+    "core@factory-plugins": true
+  },
+  "logoAnimation": "off",
+  "customModels": [
+    {
+      "model": "gpt-5-mini",
+      "displayName": "gpt-5-mini",
+      "baseUrl": "https://aigateway.cheersin.com/v1",
+      "apiKey": "YOUR_API_KEY_HERE",
+      "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "gpt-5.1-codex-max",
+      "displayName": "gpt-5.1-codex-max",
+      "baseUrl": "https://aigateway.cheersin.com/v1",
+      "apiKey": "YOUR_API_KEY_HERE",
+      "provider": "openai"
+    },
+    {
+      "model": "grok-code-fast-1",
+      "displayName": "grok-code-fast-1",
+      "baseUrl": "https://aigateway.cheersin.com/v1",
+      "apiKey": "YOUR_API_KEY_HERE",
+      "provider": "generic-chat-completion-api"
+    }
+  ],
+  "sessionDefaultSettings": {
+    "model": "gpt-5-mini",
+    "reasoningEffort": "none",
+    "interactionMode": "auto",
+    "autonomyLevel": "Med",
+    "autonomyMode": "normal"
+  },
+  "showThinkingInMainView": true,
+  "showTokenUsageIndicator": true
+}

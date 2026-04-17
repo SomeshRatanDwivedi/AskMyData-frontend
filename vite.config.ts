@@ -13,9 +13,14 @@ export default defineConfig({
       importMode: 'async',
     }),
   ],
+  envDir: './env',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+    server: {
+    host: true,
+    port: 5173
+  }
 })
